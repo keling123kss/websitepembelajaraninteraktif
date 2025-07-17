@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Mesh | Sistem Transmisi Manual</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #7b1fa2;
+            --secondary-color: #9c27b0;
+            --accent-color: #0288d1;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-background: rgba(255, 255, 255, 0.9);
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .back-button {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-color), #26c6da);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .section {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            transition: height 0.5s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section.visible::before {
+            height: 100%;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .section-title i {
+            color: var(--secondary-color);
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover .section-title i {
+            transform: rotate(180deg);
+        }
+
+        .interactive-diagram {
+            position: relative;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .diagram-hotspot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 31, 162, 0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(123, 31, 162, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 31, 162, 0); }
+        }
+
+        .hotspot-content {
+            position: absolute;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            display: none;
+            z-index: 10;
+            min-width: 200px;
+        }
+
+        .diagram-hotspot:hover .hotspot-content {
+            display: block;
+        }
+
+        .interactive-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .animation-container {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .gear-animation {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-md);
+        }
+        .back-button-footer {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 1rem auto;
+            display: block;
+            max-width: 150px;
+            text-align: center;
+            transition: background 0.3s ease;
+            user-select: none;
+        }
+
+        .back-button-footer:hover {
+            background: var(--secondary-color);
+        }
+        footer {
+            background: linear-gradient(to right, var(--accent-color), #26c6da);
+            color: white;
+            text-align: center;
+            padding: 1.25rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .interactive-tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                width: 100%;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+            }
+
+            .animation-container {
+                height: 200px;
+            }
+        }
+
+        /* Material Icons Grid Styles */
+        .material-icons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .material-icon-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .material-icon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .material-icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .material-icon-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .material-icon-card:hover .icon-wrapper {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .icon-wrapper i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .icon-content {
+            flex: 1;
+        }
+
+        .icon-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .icon-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .progress-bar-mini {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            transition: width 0.3s ease;
+        }
+
+        .material-icon-card:hover .progress-bar-mini {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .material-icons-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .material-icon-card {
+                padding: 1.25rem;
+            }
+
+            .icon-wrapper {
+                width: 50px;
+                height: 50px;
+            }
+
+            .icon-wrapper i {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .material-icons-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .material-icon-card {
+                padding: 1rem;
+            }
+
+            .icon-wrapper {
+                width: 45px;
+                height: 45px;
+            }
+
+            .icon-wrapper i {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <header>
+        PENGERTIAN | SISTEM TRANSMISI MANUAL
+    </header>
+
+    <div class="content-container">
+        <!-- New Material Icons Grid -->
+        <div class="material-icons-grid">
+            <div class="material-icon-card" onclick="scrollToSection('pengenalan')">
+                <div class="icon-wrapper">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="icon-content">
+                    <h3 class="icon-title">Pengertian</h3>
+                    <p class="icon-description">Dasar-dasar pengertian transmisi manual</p>
+                </div>
+                <div class="progress-indicator">
+                    <div class="progress-bar-mini"></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Pengertian Transmisi Manual
+            </h2>
+            <p>
+                Transmisi adalah tipe transmisi manual yang menggunakan gigi yang saling bergeser untuk menghubungkan dan memutuskan tenaga dari mesin ke roda. Pada sistem ini, gigi-gigi tidak memiliki mekanisme penghubung otomatis, sehingga pengemudi harus secara manual memindahkan gigi dengan menggunakan tuas transmisi.
+            </p>
+            <div id="overview" class="tab-content active">
+                <div class="animation-container">
+                    <img src="gambar-transmisi.jpg" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Prinsip Kerja Transmisi Manual
+            </h2>
+            <p>
+                Transmisi manual menganut prinsip momen yang sederhana. Transmisi manual sendiri bekerja berdasarkan rasio roda gigi. dengan melakukan perubahan pada rasio roda gigi pada sistem transmisi, akan membuat mobil mengalami perbedaan output kecepatan. Contohnya saat mobil melewati jalan yang menanjak, maka diperlukan torsi yang besar untuk menahan beban yang ada. Torsi didapatkan dengan cara mereduksi kecepatan putar melalui tranmsimi sehingga didapatkan torsi yang lebih besar pada daya yang sama. Sebaliknya jika dibutuhkan torsi yang rendah maka kecepatanya akan ditingkatkan.
+            </p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Jenis-Jenis Transmisi Manual
+            </h2>
+            <p>1. Type Sliding-Mesh</p>
+            <p>2. Type Synchromesh</p>
+            <p>3. Type Constan-Mesh</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Pengertian Slidingmesh
+            </h2>
+            <p>
+                Sliding mesh merupakan jenis awal transmisi manual dan paling mudah untuk dimengerti. Transmisi jenis ini, karena memang memiliki banyak kekurangan dalam cara kerjanya. Diantaranya adalah karena mengeluarkan suara yang kasar saat perpindahan gigi, perpindahan gigi membutuhkan waktu yang cukup lama, hanya dapat menggunakan salah satu dari roda gigi.
+            </p>
+            <div id="overview" class="tab-content active">
+                <div class="animation-container">
+                    <img src="Sliding-Mesh-Gearbox.jpg" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+            <p>Berikut adalah gambar skema aliran tenaga transmisi sliding mesh :</p>
+            <div class="animation-container">
+                <img src="cara kerja slidingmesh 1.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Posisi 1</p>
+            <p>Pada gigi pertama, kotak roda gigi menyediakan torsi maksimum pada kecepatan rendah. Gigi terkecil pada poros utama terhubung dengan gigi terbesar pada poros utama, sehingga menyalurkan torsi tinggi.</p>
+            <div class="animation-container">
+                <img src="cara kerja slidingmesh 1,2.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Posisi 2</p>
+            <p>Pada gigi kedua,roda gigi menyediakan torsi rendah dan kecepatan tinggi jika dibandingkan dengan gigi pertama.</p>
+            <div class="animation-container">
+                <img src="cara kerja slidingmesh 3,4.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Posisi 3</p>
+            <p>Pada gigi ketiga, gearbox memberikan torsi rendah dan kecepatan tinggi jika dibandingkan dengan gigi kedua.</p>
+
+        </section><section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Pengertian Synchromesh
+            </h2>
+            <p>
+                Synchromesh adalah sistem transmisi manual yang dilengkapi dengan unit sinkroniser untuk menyamakan kecepatan gigi yang akan dipasangkan, sehingga perpindahan gigi menjadi lebih halus dan tidak menimbulkan kerusakan pada gigi.
+            </p>
+            <div id="overview" class="tab-content active">
+                <div class="animation-container">
+                    <img src="unit-synchromesh-2.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+            <p>Cara Kerta Synchromesh</p>
+            <div class="animation-container">
+                <img src="synchromesh posisi netral.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Roda gigi sinkromesh terhubung dengan poros input, kedua roda gigi tingkat bebas berputar pada poros output. kopling terhubung dan bergerak sepanjang alur roda gigi sinkromesh.</p>
+            <div class="animation-container">
+                <img src="sy posisi mengerem.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Kopling geser didorong ke kanan, cincin sinkromesh ikut terdorong dan terhubung dengan konis pengereman roda gigi tingkat terjadi pengereman. Putaran unit sinkromeh sama dengan putaran roda gigi. </p>
+            <div class="animation-container">
+                <img src="sy posisi penghubung.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Kopling geser digerakan lebih jauh mengakibatkan roda gigi sinkromeh terhubung dengan roda gigi tingkat, kemudia roda gigi tingkat terhubung dengan poros output</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Pengertian Constansmesh
+            </h2>
+            <p>
+                Transmisi tipe constant mesh adalah jenis transmisi manual yang cara kerja dalam pemindahan giginya memerlukan bantuan kopling geser agar terjadi perpindahan tenaga dari poros input ke poros out put. Transmisi jenis constant mesh antara roda gigi input dan out put nya selalu berkaitan, tetapi roda gigi output tidak satu poros dengan poros output transmisi. Tenaga akan diteruskan ke poros output melalui mekanisme kopling geser. Transmisi jenis ini memungkinkan untuk menggunakan roda gigi lebih dari satu jenis
+            </p>
+            <div id="overview" class="tab-content active">
+                <div class="animation-container">
+                    <img src="constant-mesh.jpeg" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Cara Kerja Sistem Transmisi Manual
+            </h2>
+            <p>kendaraan yang menggunakan tranmsisi manual, perpindahan kecepatan yang dilakukan ialah sesuai kebutuhan pengemudi dengan memindahkan tuas persneling. berikut adalah cara kerja transmisi manual pada 5 percepatan</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Netral (N)
+            </h2>
+            <div class="animation-container">
+                <img src="netral.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Saat posisi netral tenaga dari mesin tidak diteruskan ke poros out put, karena synchromesh dalam keadaan bebas atau tidak terhubung dengan gigi tingkat </p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Gigi 1
+            </h2>
+            <div class="animation-container">
+                <img src="1.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Jika tuas persneling ditarik ke belakang, maka gear selection fork akan menghubungkan unit synchromesh untuk berkaitan dengan gigi 1, posisi gigi 1 akan menghasilkan putaran yang lambat tetapi momen pada poros out put besar</p>
+            <p>Aliran Tenaga
+                Poros input→gear pemabnding utama (primer)→gear pembanding 1→gear 1→unit synchromesh→poros output</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Gigi 2
+            </h2>
+            <div class="animation-container">
+                <img src="2.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Tuas didorong ke depan menggerakan gear selector fork sehingga unit synchromesh berhubungan dengan gigi 2. Posisi gigi 2 putaran poros output lebih cepat dibanding pada posisi 1</p>
+            <p>Aliran Tenaga
+                Poros input→gear main scraft→poros gear counter→gear pembanding 2→unit synchromesh→poros output</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Gigi 3
+            </h2>
+            <div class="animation-container">
+                <img src="3.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Jika tuas persneling ditarik ke belakang, maka gear selection fork akan menghubungkan unit synchromesh untuk berkaitan dengan gigi 3. Posisi gigi 3 menghasilkan putaran yang cepat dibanding gigi 2</p>
+            <p>Aliran Tenaga
+                Poros input→gear main scraft→poros gear counter→gear pembanding 3→unit synchromesh→poros output.</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Gigi 4
+            </h2>
+            <div class="animation-container">
+                <img src="4.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Tuas didorong ke depan menggerakan gear selector fork sehingga unit synchromesh berhubungan dengan gigi 4. Posisi gigi 4 putaran poros output lebih cepat dibanding pada posisi 3</p>
+            <p>Aliran tenaga
+                Poros input→gear main scraft→poros gear counter→gear pembanding 4→gear 4→unit synchromesh→poros out put.</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Gigi 5
+            </h2>
+            <div class="animation-container">
+                <img src="5.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Tuas persneling ditarik kebelakang menggerakan gear selection fork sehingga unit synchromesh berhubungan dengan gigi 5. Transmisi pada gigi lima kecepatanya paling tinggi tetapi momen yang dihasilkan pada poros output paling kecil</p>
+            <p>Aliran Tenaga
+                Poros input→gear man scarft→poros gear counter→gear pembanding 5→gear 5→unit synchromesh→poros output.</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Posisi Mundur
+            </h2>
+            <div class="animation-container">
+                <img src="mundur.png" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <p>Tuas persneling didorong ke depan menggerakkan gear selection fork sehingga unit synchromesh berhubungan dengan roda gigi R. antara roda gigi R dan rodagigi pembanding dipasangkan roda gigi idle (idle gear) yang menyebabkan putaran poros input berlawanan arah dengan poros out put</p>
+            <p>Aliran Tenaga
+                Poros input→gear main scraft→poros gear counter→gear pembanding R→idle gear→unit synchromesh→poros output</p>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Refensi Pembelajaran
+            </h2>
+            <p>
+                Untuk informasi lebih lanjut, silakan kunjungi 
+                <a href="https://repository.poliupg.ac.id/id/eprint/1509/1/Overhaul%20%20Sistem%20%20Penerus%20Daya%20Pada%20Mobil%20%20Toyota%20%20Kijang%20%205k.pdf" target="_blank">tautan ini</a>.
+            </p>
+        </section>
+    </div>
+    <!-- Kembali Button -->
+    <button class="back-button-footer" onclick="window.history.back();" aria-label="Kembali ke halaman sebelumnya">Kembali</button>
+
+    <footer>
+        E-LEARNING TRANSMISI MANUAL<br>
+        UNIVERSITAS NEGERI SEMARANG
+    </footer>
+
+    <script>
+        // Progress bar
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.querySelector(".progress-bar").style.width = scrolled + "%";
+        };
+
+        // Section visibility
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Tabs
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        // Feature card detail
+        function showDetail(stepId) {
+            // Implementation for showing step details
+            alert('Detail untuk ' + stepId);
+        }
+
+        // Add smooth scroll function
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

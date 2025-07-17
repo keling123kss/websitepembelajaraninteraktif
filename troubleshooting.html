@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting Transmisi Manual</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #7b1fa2; /* Keeping a similar color scheme or adjust as needed */
+            --secondary-color: #9c27b0;
+            --accent-color: #0288d1;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-background: rgba(255, 255, 255, 0.9);
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-color), #26c6da); /* Adjusted color */
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .section {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            transition: height 0.5s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section.visible::before {
+            height: 100%;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .section-title i {
+            color: var(--secondary-color);
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover .section-title i {
+            transform: rotate(180deg);
+        }
+
+        .interactive-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Styles for images within content */
+        .content-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Styles for tables within content */
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .content-table th,
+        .content-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .content-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .content-table tr:nth-child(even) {
+            background-color: rgba(242, 242, 242, 0.5); /* Adding transparency */
+        }
+
+        .content-table tr:hover {
+            background-color: rgba(221, 221, 221, 0.5); /* Adding transparency */
+        }
+        .back-button-footer {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 1rem auto;
+            display: block;
+            max-width: 150px;
+            text-align: center;
+            transition: background 0.3s ease;
+            user-select: none;
+        }
+
+        .back-button-footer:hover {
+            background: var(--secondary-color);
+        }
+
+        footer {
+            background: linear-gradient(to right, var(--accent-color), #26c6da); /* Adjusted color */
+            color: white;
+            text-align: center;
+            padding: 1.25rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .interactive-tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+
+    <header>
+        TROUBLESHOOTING SISTEM TRANSMISI MANUAL
+    </header>
+
+    <div class="content-container">
+
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Pengenalan Masalah Kopling Slip
+            </h2>
+            <p>
+                Kopling slip terjadi ketika kopling gagal mentransfer torsi mesin sepenuhnya ke transmisi. Ini menyebabkan hilangnya tenaga dan akselerasi yang buruk. Masalah ini dapat disebabkan oleh beberapa faktor dan perlu segera diatasi untuk mencegah kerusakan lebih lanjut.
+            </p>
+        </section>
+
+        <section class="section" id="detail">
+            <h2 class="section-title">
+                <i class="fas fa-wrench"></i>
+                Detail Troubleshooting
+            </h2>
+            <div class="interactive-tabs">
+                <button class="tab-button active" onclick="showTab('symptoms')">Gejala</button>
+                <button class="tab-button" onclick="showTab('causes')">Penyebab Umum</button>
+                <button class="tab-button" onclick="showTab('solutions')">Solusi & Perbaikan</button>
+            </div>
+            <div id="symptoms" class="tab-content active">
+                <h3>Gejala Kopling Slip</h3>
+                <p>Berikut adalah beberapa gejala umum yang menandakan kopling mengalami slip:</p>
+                <ul>
+                    <li>Putaran mesin (RPM) meningkat saat akselerasi, tetapi kecepatan kendaraan tidak bertambah secara proporsional.</li>
+                    <li>Bau hangus, mirip dengan karet terbakar.</li>
+                    <li>Kesulitan saat menanjak atau membawa beban berat.</li>
+                    <li>Pedal kopling terasa lebih tinggi dari biasanya.</li>
+                </ul>
+            </div>
+            <div id="causes" class="tab-content">
+                <h3>Penyebab Umum Kopling Slip</h3>
+                <p>Beberapa alasan utama mengapa kopling bisa slip meliputi:</p>
+                <table class="content-table">
+                    <thead>
+                        <tr>
+                            <th>Penyebab</th>
+                            <th>Penjelasan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Kampas Kopling Aus</td>
+                            <td>Material kampas kopling sudah habis, mengurangi gesekan dengan flywheel dan plat penekan.</td>
+                        </tr>
+                        <tr>
+                            <td>Permukaan Flywheel atau Plat Penekan Berminyak/Terkena Gemuk</td>
+                            <td>Kontaminasi mengurangi koefisien gesek.</td>
+                        </tr>
+                        <tr>
+                            <td>Setelan Pedal Kopling Terlalu Kencang</td>
+                            <td>Tidak ada 'free play' pada pedal, menyebabkan kopling sedikit tertekan terus-menerus.</td>
+                        </tr>
+                         <tr>
+                            <td>Pegas Diafragma Lemah atau Rusak</td>
+                            <td>Tekanan pada plat kopling berkurang.</td>
+                        </tr>
+                         <tr>
+                            <td>Pilot Bearing atau Release Bearing Macet</td>
+                            <td>Menyebabkan tekanan tidak merata atau kopling sulit bebas sempurna.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="solutions" class="tab-content">
+                <h3>Solusi dan Langkah Perbaikan</h3>
+                <p>Langkah-langkah untuk mengatasi kopling slip tergantung pada penyebabnya:</p>
+                <p><strong>1. Periksa dan Setel Pedal Kopling:</strong></p>
+                <p>Pastikan ada jarak bebas (free play) pada pedal kopling sesuai spesifikasi manual kendaraan. Penyetelan yang benar dapat mengatasi slip ringan.</p>
+                <p>untuk informasi lebih lanjut, silahkan kunjungi
+                    <a href="https://toyotakijangcybercommunity.blogspot.com/2015/06/cara-menyetel-pedal-kopling-free-play.html" target="_blank">tautan ini</a>
+                </p>
+                <img src="penyetelan pedal kopling.png" alt="Penyetelan Pedal Kopling" class="content-image">
+                <p><strong>2. Periksa Kebocoran Oli:</strong></p>
+                <p>Identifikasi sumber kebocoran oli (mesin atau transmisi) yang mungkin mencemari kampas kopling. Perbaiki kebocoran dan bersihkan atau ganti komponen kopling yang terkontaminasi.</p>
+                 <img src="oli bocor.png" alt="Kebocoran Oli" class="content-image">
+                <p><strong>3. Ganti Komponen Kopling yang Aus atau Rusak:</strong></p>
+                <p>Jika kampas kopling, plat penekan, flywheel (jika rusak parah), pegas diafragma, atau bearing aus atau rusak, komponen tersebut harus diganti. Ini seringkali merupakan solusi yang paling umum untuk kopling slip parah.</p>
+                <img src="kopling aus.png" alt="Komponen Kopling" class="content-image">
+                <p><strong>4. Bersihkan Permukaan yang Terkontaminasi:</strong></p>
+                <p>Jika kampas kopling masih tebal tetapi terkontaminasi ringan, kadang-kadang membersihkannya bersama flywheel dan plat penekan bisa membantu, tetapi penggantian seringkali lebih disarankan.</p>
+            </div>
+        </section>
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Refensi Pembelajaran
+            </h2>
+            <p>
+                Untuk informasi lebih lanjut, silakan kunjungi 
+                <a href="https://youtu.be/_HJIB_3oKbc?si=JPzZNgNG89WG8DYm" target="_blank">tautan ini</a>.
+            </p>
+        </section>
+
+        <!-- Add more sections for other aspects of troubleshooting if needed -->
+
+    </div>
+    <!-- Kembali Button -->
+    <button class="back-button-footer" onclick="window.history.back();" aria-label="Kembali ke halaman sebelumnya">Kembali</button>
+    <footer>
+        E-LEARNING TRANSMISI MANUAL<br>
+        UNIVERSITAS NEGERI SEMARANG
+    </footer>
+
+    <script>
+        // Progress bar (copied from sliding-mesh.html)
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.querySelector(".progress-bar").style.width = scrolled + "%";
+        };
+
+        // Section visibility (copied from sliding-mesh.html)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Tabs (copied from sliding-mesh.html)
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+         // Initialize the first tab as active on page load
+         document.addEventListener('DOMContentLoaded', () => {
+            showTab('symptoms'); // Show the symptoms tab by default
+        });
+
+        // Add smooth scroll function (copied from sliding-mesh.html - although not strictly needed for this page structure, keeping it for potential future use or consistency)
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+    </script>
+</body>
+</html> 

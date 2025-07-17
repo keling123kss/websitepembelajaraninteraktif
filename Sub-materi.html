@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Materi Sistem Transmisi Manual | Sistem Transmisi Manual</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --primary-color: #7b1fa2;
+            --secondary-color: #9c27b0;
+            --accent-color: #ffffff;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-background: rgba(255, 255, 255, 0.9);
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --transition-time: 0.3s;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0rem 1rem;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem 2rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+            width: 120%;
+            height: 100%;
+            border-radius: 0px;
+            user-select: none;
+        }
+
+        .objectives-container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+            user-select: none;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+
+        .objective-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-time) ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .objective-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            transition: all var(--transition-time) ease;
+        }
+
+        .objective-card.expanded {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            background: white;
+            z-index: 10;
+        }
+
+        .objective-card.expanded::before {
+            width: 8px;
+        }
+
+        .objective-title {
+            color: var(--primary-color);
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all var(--transition-time) ease;
+        }
+
+        .objective-title i {
+            color: var(--secondary-color);
+            transition: all var(--transition-time) ease;
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .objective-card.expanded .objective-title i {
+            transform: scale(1.2) rotate(8deg);
+            color: var(--primary-color);
+        }
+
+        .objective-list {
+            list-style: none;
+            padding-left: 2.5rem;
+            transition: all var(--transition-time) ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .objective-card.expanded .objective-list {
+            max-height: 1000px; /* large enough to show content */
+            opacity: 1;
+        }
+
+        .objective-list li {
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            position: relative;
+            line-height: 1.6;
+            transition: all var(--transition-time) ease;
+            transform-origin: left;
+            opacity: 0.9;
+        }
+
+        .objective-list li::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            transform: translateY(-50%);
+            transition: all var(--transition-time) ease;
+        }
+
+        .objective-card.expanded .objective-list li {
+            transform: translateX(7px);
+            opacity: 1;
+        }
+
+        .objective-card.expanded .objective-list li::before {
+            background-color: var(--primary-color);
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            transition: width var(--transition-time) ease;
+        }
+
+        .objective-card.expanded .progress-fill {
+            width: 100%;
+        }
+
+        /* Completion checkmarks */
+        .completion-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--accent-color);
+            transition: all var(--transition-time) ease;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .completion-status i {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            opacity: 0;
+            transition: all var(--transition-time) ease;
+        }
+
+        .objective-card.expanded:hover .completion-status,
+        .objective-card.expanded {
+            background: var(--accent-color);
+            transform: scale(1.1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .objective-card.expanded:hover .completion-status i,
+        .objective-card.expanded .completion-status i {
+            opacity: 1;
+            color: white;
+        }
+
+        .back-button-footer {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 1rem auto;
+            display: block;
+            max-width: 150px;
+            text-align: center;
+            transition: background 0.3s ease;
+            user-select: none;
+        }
+
+        .back-button-footer:hover {
+            background: var(--secondary-color);
+        }
+
+        footer {
+            background:#26c6da;
+            color: #ffffff;
+            text-align: center;
+            padding: 1.25rem;
+            margin-top: auto;
+            width: 150%;
+            height: 100%;
+            border-radius: 0 0 10px 10px;
+            user-select: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            body {
+                padding: 1rem;
+            }
+            .objectives-container {
+                padding: 1.5rem;
+                margin: 1rem auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem;
+            }
+            .objectives-container {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+            .objective-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            .objective-title {
+                font-size: 1.1rem;
+            }
+            .objective-title i {
+                font-size: 1.3em;
+            }
+            .completion-status {
+                width: 20px;
+                height: 20px;
+            }
+            .objective-list {
+                padding-left: 4rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            .objectives-container {
+                padding: 0.75rem;
+            }
+            .objective-card {
+                padding: 1.25rem;
+            }
+            .objective-title {
+                font-size: 1rem;
+            }
+            .objective-title i {
+                font-size: 1.2em;
+            }
+            .completion-status {
+                width: 18px;
+                height: 18px;
+            }
+            .objective-list {
+                padding-left: 1.75rem;
+            }
+        }
+
+        /* Touch feedback for mobile */
+        @media (hover: none) {
+            .objective-card:active {
+                transform: translateY(-3px) translateX(3px);
+            }
+            .objective-card:active .progress-fill {
+                width: 100%;
+            }
+            .objective-card:active .completion-status {
+                background: var(--accent-color);
+            }
+            .objective-card:active .completion-status i {
+                opacity: 1;
+                color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        MATERI SISTEM TRANSMISI MANUAL | SISTEM TRANSMISI MANUAL
+    </header>
+
+    <div class="objectives-container" id="objectives-container">
+
+    
+        <h1 class="section-title">MATERI SISTEM TRANSMISI MANUAL</h1>
+        <div class="objective-card" data-index="0" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-book" aria-hidden="true"></i> <!-- Changed icon to book -->
+                PENGERTIAN
+            </h2>
+            <ul class="objective-list">
+                <li> Transmisi adalah tipe transmisi manual yang menggunakan gigi yang saling bergeser untuk menghubungkan dan memutuskan tenaga dari mesin ke roda. Pada sistem ini, gigi-gigi tidak memiliki mekanisme penghubung otomatis, sehingga pengemudi harus secara manual memindahkan gigi dengan menggunakan tuas transmisi.</li>
+                <img src="gambar-transmisi.jpg" alt="Sliding-Mesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="1" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                PRINSIP KERJA SISTEM TRANSMISI MANUAL
+            </h2>
+            <ul class="objective-list">
+                <li>Transmisi manual menganut prinsip momen yang sederhana. Transmisi manual sendiri bekerja berdasarkan rasio roda gigi. dengan melakukan perubahan pada rasio roda gigi pada sistem transmisi, akan membuat mobil mengalami perbedaan output kecepatan. Contohnya saat mobil melewati jalan yang menanjak, maka diperlukan torsi yang besar untuk menahan beban yang ada. Torsi didapatkan dengan cara mereduksi kecepatan putar melalui tranmsimi sehingga didapatkan torsi yang lebih besar pada daya yang sama. Sebaliknya jika dibutuhkan torsi yang rendah maka kecepatanya akan ditingkatkan.</li>
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="2" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-cogs" aria-hidden="true"></i>
+                JENIS-JENIS SISTEM TRANSMISI MANUAL
+            </h2>
+            <ul class="objective-list">
+                <li>Sliding-Mesh Unit</li>
+                <li>Synchronmesh</li>
+                <li>Constant-Mesh</li>
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="3" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-cogs" aria-hidden="true"></i>
+                PENGERTIAN SLIDING MESH
+            </h2>
+            <ul class="objective-list">
+                <li>Sliding mesh merupakan jenis awal transmisi manual dan paling mudah untuk dimengerti. Transmisi jenis ini, karena memang memiliki banyak kekurangan dalam cara kerjanya. Diantaranya adalah karena mengeluarkan suara yang kasar saat perpindahan gigi, perpindahan gigi membutuhkan waktu yang cukup lama, hanya dapat menggunakan salah satu dari roda gigi.</li>
+                <img src="Sliding-Mesh-Gearbox.jpg" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;"> 
+                <li>berikut adalah gambar skema aliran tenaga transmisi sliding mesh</li>
+                <img src="cara kerja slidingmesh 1.png" alt="Sliding-Mesh Unit" style="width: 15%; height: 15%; object-fit: contain;">
+                <p>Posisi 1</p>
+                <p>Pada gigi pertama, kotak roda gigi menyediakan torsi maksimum pada kecepatan rendah. Gigi terkecil pada poros utama terhubung dengan gigi terbesar pada poros utama, sehingga menyalurkan torsi tinggi.</p>
+                <img src="cara kerja slidingmesh 1,2.png" alt="Sliding-Mesh Unit" style="width: 15%; height: 15%; object-fit: contain;">
+                <p>Posisi 2</p>
+                <p>Pada gigi kedua,roda gigi menyediakan torsi rendah dan kecepatan tinggi jika dibandingkan dengan gigi pertama.</p>
+                <img src="cara kerja slidingmesh 3,4.png" alt="Sliding-Mesh Unit" style="width: 15%; height: 15%; object-fit: contain;">
+                <p>Posisi 3</p>
+                <p>Pada gigi ketiga, gearbox memberikan torsi rendah dan kecepatan tinggi jika dibandingkan dengan gigi kedua.</p>
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="4" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-cogs" aria-hidden="true"></i>
+                PENGERTIAN SYNCHRONMESH
+            </h2>
+            <ul class="objective-list">
+                <li>Synchromesh adalah sistem transmisi manual yang dilengkapi dengan unit sinkroniser untuk menyamakan kecepatan gigi yang akan dipasangkan, sehingga perpindahan gigi menjadi lebih halus dan tidak menimbulkan kerusakan pada gigi.</li>
+                <img src="unit-synchromesh-2.png" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;">
+                <LI>Cara kerja Synchromesh </LI>
+                <li>Roda gigi sinkromesh terhubung dengan poros input, kedua roda gigi tingkat bebas berputar pada poros output. kopling terhubung dan bergerak sepanjang alur roda gigi sinkromesh.</li>
+                <img src="synchromesh posisi netral.png" alt="Sliding-Mesh Unit" style="width: 15%; height: 15%; object-fit: contain;">
+                <li>Kopling geser didorong ke kanan, cincin sinkromesh ikut terdorong dan terhubung dengan konis pengereman roda gigi tingkat terjadi pengereman. Putaran unit sinkromeh sama dengan putaran roda gigi. </li>
+                <img src="sy posisi mengerem.png" alt="Sliding-Mesh Unit" style="width: 15%; height: 15%; object-fit: contain;">
+                <li>Kopling geser digerakan lebih jauh mengakibatkan roda gigi sinkromeh terhubung dengan roda gigi tingkat, kemudia roda gigi tingkat terhubung dengan poros output</li>
+                <img src="sy posisi penghubung.png" alt="Sliding-Mesh Unit" style="width: 15%; height: 15%; object-fit: contain;">
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="5" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-cogs" aria-hidden="true"></i>
+                PENGERTIAN CONSTANT-MESH
+            </h2>
+            <ul class="objective-list">
+                <li>Transmisi tipe constant mesh adalah jenis transmisi manual yang cara kerja dalam pemindahan giginya memerlukan bantuan kopling geser agar terjadi perpindahan tenaga dari poros input ke poros out put. Transmisi jenis constant mesh antara roda gigi input dan out put nya selalu berkaitan, tetapi roda gigi output tidak satu poros dengan poros output transmisi. Tenaga akan diteruskan ke poros output melalui mekanisme kopling geser. Transmisi jenis ini memungkinkan untuk menggunakan roda gigi lebih dari satu jenis</li>
+                <img src="constant-mesh.jpeg" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;">
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="6" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-tools" aria-hidden="true"></i>
+                CARA KERJA SISTEM TRANSMISI MANUAL
+            </h2>
+            <ul class="objective-list">
+                <li>Posisi Netral</li>
+                <img src="1.png" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;">
+                <li>Jika tuas persneling ditarik ke belakang, maka gear selection fork akan menghubungkan unit synchromesh untuk berkaitan dengan gigi 1, posisi gigi 1 akan menghasilkan putaran yang lambat tetapi momen pada poros out put besar</li>
+                <li>Aliran Tenaga
+                    Poros input→gear pembanding utama (primer)→gear pembanding 1→gear 1→unit synchromesh→poros output</li>
+                <li>Posisi Gigi 1</li>
+                <img src="2.png" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;">
+                <p>Tuas didorong ke depan menggerakan gear selector fork sehingga unit synchromesh berhubungan dengan gigi 2. Posisi gigi 2 putaran poros output lebih cepat dibanding pada posisi 1</p>
+                <p>Aliran Tenaga
+                    Poros input→gear main scraft→poros gear counter→gear pembanding 2→unit synchromesh→poros output</p>
+                <li>Posisi Gigi 2</li>
+                <img src="2.png" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;">
+                <p>Tuas didorong ke depan menggerakan gear selector fork sehingga unit synchromesh berhubungan dengan gigi 2. Posisi gigi 2 putaran poros output lebih cepat dibanding pada posisi 1</p>
+                <p>Aliran Tenaga
+                Poros input→gear main scraft→poros gear counter→gear pembanding 2→unit synchromesh→poros output</p>
+                <li>Posisi Gigi Mundur</li>
+                <img src="mundur.png" alt="Sliding-Mesh Unit" style="width: 20%; height: 20%; object-fit: contain;">
+                <p>Tuas persneling didorong ke depan menggerakkan gear selection fork sehingga unit synchromesh berhubungan dengan roda gigi R. antara roda gigi R dan rodagigi pembanding dipasangkan roda gigi idle (idle gear) yang menyebabkan putaran poros input berlawanan arah dengan poros out put</p>
+                <p>Aliran Tenaga
+                    Poros input→gear main scraft→poros gear counter→gear pembanding R→idle gear→unit synchromesh→poros output</p>
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="objective-card" data-index="7" tabindex="0" aria-expanded="false" role="button">
+            <div class="completion-status" aria-label="Status penyelesaian"><i class="fas fa-check" aria-hidden="true"></i></div>
+            <h2 class="objective-title">
+                <i class="fas fa-book" aria-hidden="true"></i>
+                REFERENSI PUSTAKA
+            </h2>
+            <ul class="objective-list">
+                <li> <p>
+                    Untuk informasi lebih lanjut, silakan kunjungi 
+                    <a href="https://repository.poliupg.ac.id/id/eprint/1509/1/Overhaul%20%20Sistem%20%20Penerus%20Daya%20Pada%20Mobil%20%20Toyota%20%20Kijang%20%205k.pdf" target="_blank">tautan ini</a>.
+                </p></li>
+            </ul>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <!-- Kembali Button -->
+<button class="back-button-footer" onclick="window.history.back();" aria-label="Kembali ke halaman sebelumnya">Kembali</button>
+    </div>
+    <footer>
+        E-LEARNING TRANSMISI MANUAL<br />
+        UNIVERSITAS NEGERI SEMARANG
+    </footer>
+
+    <script>
+        // Make objective cards interactive: expand/collapse with keyboard and click
+        document.querySelectorAll('.objective-card').forEach(card => {
+            const objectiveList = card.querySelector('.objective-list');
+            const progressFill = card.querySelector('.progress-fill');
+
+            function toggle() {
+                const expanded = card.classList.toggle('expanded');
+                card.setAttribute('aria-expanded', expanded);
+                if (expanded) {
+                    // Animate progress fill to full width
+                    progressFill.style.width = '100%';
+                } else {
+                    // Reset progress fill width
+                    progressFill.style.width = '0';
+                }
+            }
+
+            card.addEventListener('click', toggle);
+
+            card.addEventListener('keypress', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

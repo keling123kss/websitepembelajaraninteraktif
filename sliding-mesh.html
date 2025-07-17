@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Mesh | Sistem Transmisi Manual</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #7b1fa2;
+            --secondary-color: #9c27b0;
+            --accent-color: #0288d1;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-background: rgba(255, 255, 255, 0.9);
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .back-button {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-color), #26c6da);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .section {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            transition: height 0.5s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section.visible::before {
+            height: 100%;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .section-title i {
+            color: var(--secondary-color);
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover .section-title i {
+            transform: rotate(180deg);
+        }
+
+        .interactive-diagram {
+            position: relative;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .diagram-hotspot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 31, 162, 0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(123, 31, 162, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 31, 162, 0); }
+        }
+
+        .hotspot-content {
+            position: absolute;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            display: none;
+            z-index: 10;
+            min-width: 200px;
+        }
+
+        .diagram-hotspot:hover .hotspot-content {
+            display: block;
+        }
+
+        .interactive-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .animation-container {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .gear-animation {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-md);
+        }
+        .back-button-footer {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 1rem auto;
+            display: block;
+            max-width: 150px;
+            text-align: center;
+            transition: background 0.3s ease;
+            user-select: none;
+        }
+
+        .back-button-footer:hover {
+            background: var(--secondary-color);
+        }
+        
+
+        footer {
+            background: linear-gradient(to right, var(--accent-color), #26c6da);
+            color: white;
+            text-align: center;
+            padding: 1.25rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .interactive-tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                width: 100%;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+            }
+
+            .animation-container {
+                height: 200px;
+            }
+        }
+
+        /* Material Icons Grid Styles */
+        .material-icons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .material-icon-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .material-icon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .material-icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .material-icon-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .material-icon-card:hover .icon-wrapper {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .icon-wrapper i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .icon-content {
+            flex: 1;
+        }
+
+        .icon-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .icon-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .progress-bar-mini {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            transition: width 0.3s ease;
+        }
+
+        .material-icon-card:hover .progress-bar-mini {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .material-icons-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .material-icon-card {
+                padding: 1.25rem;
+            }
+
+            .icon-wrapper {
+                width: 50px;
+                height: 50px;
+            }
+
+            .icon-wrapper i {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .material-icons-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .material-icon-card {
+                padding: 1rem;
+            }
+
+            .icon-wrapper {
+                width: 45px;
+                height: 45px;
+            }
+
+            .icon-wrapper i {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <header>
+        SLIDING MESH | SISTEM TRANSMISI MANUAL
+    </header>
+
+    <div class="content-container">
+        <!-- New Material Icons Grid -->
+        <div class="material-icons-grid">
+            <div class="material-icon-card" onclick="scrollToSection('pengenalan')">
+                <div class="icon-wrapper">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="icon-content">
+                    <h3 class="icon-title">Pengertian</h3>
+                    <p class="icon-description">Dasar-dasar sistem Sliding Mesh</p>
+                </div>
+                <div class="progress-indicator">
+                    <div class="progress-bar-mini"></div>
+                </div>
+            </div>
+
+            <div class="material-icon-card" onclick="scrollToSection('komponen')">
+                <div class="icon-wrapper">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="icon-content">
+                    <h3 class="icon-title">Komponen</h3>
+                    <p class="icon-description">Bagian-bagian utama Sliding Mesh</p>
+                </div>
+                <div class="progress-indicator">
+                    <div class="progress-bar-mini"></div>
+                </div>
+            </div>
+
+            <div class="material-icon-card" onclick="scrollToSection('cara-kerja')">
+                <div class="icon-wrapper">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="icon-content">
+                    <h3 class="icon-title">Cara Kerja</h3>
+                    <p class="icon-description">Mekanisme kerja Sliding Mesh</p>
+                </div>
+                <div class="progress-indicator">
+                    <div class="progress-bar-mini"></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="section" id="pengenalan">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Pengertian Sliding Mesh
+            </h2>
+            <p>
+                Sliding mesh merupakan jenis awal transmisi manual dan paling mudah untuk dimengerti. Transmisi jenis ini, karena memang memiliki banyak kekurangan dalam cara kerjanya. Diantaranya adalah karena mengeluarkan suara yang kasar saat perpindahan gigi, perpindahan gigi membutuhkan waktu yang cukup lama, hanya dapat menggunakan salah satu dari roda gigi.
+            </p>
+            <div class="interactive-tabs">
+                <button class="tab-button" onclick="showTab('components')">Komponen</button>
+                <button class="tab-button" onclick="showTab('working')">Cara Kerja</button>
+            </div>
+            <div id="components" class="tab-content">
+                <div class="animation-container">
+                    <img src="Sliding-Mesh-Gearbox.jpg" alt="Synchromesh Unit" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Output Shaft</h3>
+                        <p>Poros output mentransfer tenaga yang telah diproses oleh gigi-gigi transmisi ke roda kendaraan.</p>
+                      </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Input Shaft</h3>
+                        <p>Poros input adalah poros yang menghubungkan mesin dengan transmisi. Poros ini menerima tenaga dari mesin dan mentransfernya ke gigi-gigi dalam transmisi.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Clutch</h3>
+                        <p>Kopling berfungsi untuk memutuskan hubungan antara mesin dan transmisi saat pengemudi ingin mengganti gigi.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Counter Shaft</h3>
+                        <p>Berfungsi untuk meneruskan putaran dari poros input ke gigi percepatan </p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Idle Gear</h3>
+                        <p>digunakan untuk mengubah arah putaran atau untuk menghubungkan dua poros yang tidak berfungsi secara langsung satu sama lain. </p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Gear Shift Fork</h3>
+                        <p>Gear shift fork adalah komponen yang berfungsi untuk memindahkan gigi dalam transmisi manual. </p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog"></i> Clutch Gear</h3>
+                        <p>komponen yang terhubung dengan sistem kopling dan berfungsi untuk menghubungkan atau memutuskan tenaga dari mesin ke transmisi. </p>
+                    </div>
+                </div>
+            </div>
+            <div id="working" class="tab-content">
+                <div class="interactive-diagram">
+                    <video controls style="width: 100%; height: auto;">
+                        <source src="slidingmesh.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <i>Sumber : Jaes- Lesics Indonesia </i>
+                </div>
+            </div>
+            
+        </section>
+    </div>
+    <!-- Kembali Button -->
+    <button class="back-button-footer" onclick="window.history.back();" aria-label="Kembali ke halaman sebelumnya">Kembali</button>
+
+
+    <footer>
+        E-LEARNING TRANSMISI MANUAL<br>
+        UNIVERSITAS NEGERI SEMARANG
+    </footer>
+
+    <script>
+        // Progress bar
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.querySelector(".progress-bar").style.width = scrolled + "%";
+        };
+
+        // Section visibility
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Tabs
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Quiz
+        function checkAnswer(element, isCorrect) {
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('correct', 'wrong');
+            });
+            
+            if (isCorrect) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+            }
+        }
+
+        // Feature card detail
+        function showDetail(stepId) {
+            // Implementation for showing step details
+            alert('Detail untuk ' + stepId);
+        }
+
+        // Add smooth scroll function
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
